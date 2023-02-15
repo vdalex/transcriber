@@ -12,7 +12,7 @@ device = 0 if torch.cuda.is_available() else "cpu"
 pipe = pipeline(
     task="automatic-speech-recognition",
     model=MODEL_NAME,
-    chunk_length_s=30,
+    chunk_length_s=29.5,
     stride_length_s=(5, 5),
     device="cpu",
 )
