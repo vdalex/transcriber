@@ -13,6 +13,7 @@ pipe = pipeline(
     task="automatic-speech-recognition",
     model=MODEL_NAME,
     chunk_length_s=29.9,
+    
     device="cpu",
 )
 
