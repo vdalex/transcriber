@@ -3,6 +3,7 @@ from transformers import WhisperForConditionalGeneration
 from transformers import WhisperTokenizer
 from transformers import WhisperProcessor
 from transformers import WhisperFeatureExtractor
+from transformers import pipeline
 
 
 mymodel = "openai/whisper-medium"
@@ -33,8 +34,6 @@ stream.download('',"YouTube.mp4")
 model.config.forced_decoder_ids = processor.get_decoder_prompt_ids(language = "el", task = "transcribe")
 model.config.suppress_tokens = []
 #model.config.max_new_tokens = 1024
-
-from transformers import pipeline
 
 transcript = pipeline(
     task="automatic-speech-recognition",
