@@ -48,7 +48,7 @@ mf_transcribe = gr.Interface(
     ],
     outputs="text",
     layout="horizontal",
-    theme="huggingface",
+    theme="default",
     # title="Whisper Large V2: Transcribe Audio",
     description=(
         "Server uses"

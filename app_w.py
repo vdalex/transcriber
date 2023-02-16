@@ -35,7 +35,6 @@ pipe = pipeline(
     batch_size=1,
     chunk_length_s=29.5,
     stride_length_s=(5, 5),
-    condition_on_previous_text=0,
     device="cpu",
     ignore_warning=True,
 )
@@ -61,7 +60,7 @@ mf_transcribe = gr.Interface(
     ],
     outputs="text",
     layout="horizontal",
-    theme="huggingface",
+    theme="default",
     # title="Transcribe Audio",
     description=(
         "Server uses"

@@ -1,15 +1,15 @@
 #!/usr/bin/env python3
-
 import gradio as gr
 import whisper
 from datetime import datetime
 
 MODEL_NAME = "large-v2"
+#MODEL_NAME = "large-v1"
 LANG = "ru"
 DEVICE = "cpu"
 TASK = "transcribe"
 
-model = whisper.load_model(MODEL_NAME, DEVICE)
+model = whisper.load_model(name=MODEL_NAME, device=DEVICE, in_memory=False)
 
 print(f"using model: {MODEL_NAME} for {LANG}")
 
@@ -22,7 +22,7 @@ def sendToWhisper(audio_upload, results):
 
     audio = audio_upload
     results.append(result)
-    output = model.transcribe(whisper.load_audio(audio), language=LANG, fp16=False, verbose=True, task=TASK)
+    output = model.transcribe(whisper.load_audio(audio), language=LANG, fp16=False, verbose=True)
 
     result[0], result[1] = output['text'], str((datetime.now() - start).total_seconds())
     return results
