@@ -18,11 +18,11 @@ def sendToWhisper(audio_upload, results):
 
     if audio_upload is None:
         #return "ERROR: You have to upload an audio file"
-        return [["No input"]*5]
+        return [["No input"]*2]
 
     audio = audio_upload
     results.append(result)
-    output = model.transcribe(whisper.load_audio(audio), language=LANG, fp16=False, verbose=True)
+    output = model.transcribe(whisper.load_audio(audio), language=LANG, fp16=False, verbose=True, condition_on_previous_text=True)
 
     result[0], result[1] = output['text'], str((datetime.now() - start).total_seconds())
     return results
@@ -55,4 +55,4 @@ with gr.Blocks(css=CSS) as demo:
 
     submit.click(fn=sendToWhisper, inputs=[audio_upload, results], outputs=output)
 
-demo.launch(share=False)
+demo.launch(share=True)
