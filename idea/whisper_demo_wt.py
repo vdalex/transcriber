@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import os
 import gradio as gr
 import whisper
 from datetime import datetime
@@ -14,17 +15,26 @@ model = whisper.load_model(name=MODEL_NAME, device=DEVICE, in_memory=False)
 print(f"using model: {MODEL_NAME} for {LANG}")
 
 def sendToWhisper(audio_upload, results):
-    start, result = datetime.now(), [None, None]
+    start, result = datetime.now(), [None, None, None]
 
     if audio_upload is None:
         #return "ERROR: You have to upload an audio file"
-        return [["No input"]*2]
+        return [["No input"]*3]
 
     audio = audio_upload
-    results.append(result)
-    output = model.transcribe(whisper.load_audio(audio), language=LANG, fp16=False, verbose=True, condition_on_previous_text=True)
 
-    result[0], result[1] = output['text'], str((datetime.now() - start).total_seconds())
+    _, file_name = os.path.split(audio_upload)
+
+    # Gradio inserts some 8 symbols before first dot symbol in original filename
+    # e.g voice.mp3 -> voiceXXXXXXXX.mp3, voice1.2.mp3 -> voice1XXXXXXXX.2.mp3
+    # Lets restore original filename
+    dot_pos = file_name.index(".")
+    file_name = file_name[:dot_pos-8] + file_name[dot_pos:]
+
+    results.append(result)
+    output = model.transcribe(audio, language=LANG, fp16=False, verbose=True, condition_on_previous_text=True)
+
+    result[0], result[1], result[2] = file_name, output['text'], str((datetime.now() - start).total_seconds())
     return results
 
 CSS = """
@@ -51,7 +61,7 @@ with gr.Blocks(css=CSS) as demo:
             submit = gr.Button(value="Transcribe")
 
         gr.Markdown("### Result")
-        output = gr.Dataframe(headers=["Transcription", "Time [s]"], label="Results", wrap=True)
+        output = gr.Dataframe(headers=["Filename", "Transcription", "Time [s]"], label="Results", wrap=True)
 
     submit.click(fn=sendToWhisper, inputs=[audio_upload, results], outputs=output)
 
