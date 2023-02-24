@@ -35,6 +35,7 @@ def sendToWhisper(audio_upload, results):
     output = model.transcribe(audio, language=LANG, fp16=False, verbose=True, condition_on_previous_text=True)
 
     result[0], result[1], result[2] = file_name, output['text'], str((datetime.now() - start).total_seconds())
+    print(f"task completed for: {file_name}")
     return results
 
 CSS = """
