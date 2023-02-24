@@ -3,12 +3,25 @@ import os
 import gradio as gr
 import whisper
 from datetime import datetime
+import json
 
 MODEL_NAME = "large-v2"
 #MODEL_NAME = "large-v1"
 LANG = "ru"
 DEVICE = "cpu"
 TASK = "transcribe"
+
+initial_prompt_data = None
+
+if os.path.isfile("initial_prompt.json"):
+    with open("initial_prompt.json", 'r', encoding='utf-8') as file:
+        initial_prompt_json = json.load(file)
+        print(initial_prompt_json)
+    value = ""
+    for key in initial_prompt_json:
+        value = value + initial_prompt_json[key]
+
+    initial_prompt_data = value
 
 model = whisper.load_model(name=MODEL_NAME, device=DEVICE, in_memory=False)
 
@@ -32,7 +45,8 @@ def sendToWhisper(audio_upload, results):
     file_name = file_name[:dot_pos-8] + file_name[dot_pos:]
 
     results.append(result)
-    output = model.transcribe(audio, language=LANG, fp16=False, verbose=True, condition_on_previous_text=True)
+    print(f"task started for: {file_name}")
+    output = model.transcribe(audio, language=LANG, fp16=False, verbose=True, condition_on_previous_text=True, initial_prompt=initial_prompt_data)
 
     result[0], result[1], result[2] = file_name, output['text'], str((datetime.now() - start).total_seconds())
     print(f"task completed for: {file_name}")

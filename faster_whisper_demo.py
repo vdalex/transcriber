@@ -3,13 +3,26 @@ import os
 import gradio as gr
 from datetime import datetime
 from faster_whisper import WhisperModel
+import json
 
 #MODEL_NAME = "whisper-large-v2-ct2-int8/"
 MODEL_NAME = "whisper-large-v2-ct2-f16/"
 LANG = "ru"
 DEVICE = "cpu"
 
-model = WhisperModel(MODEL_NAME, device=DEVICE, compute_type="float32")
+initial_prompt_data = None
+
+if os.path.isfile("initial_prompt.json"):
+    with open("initial_prompt.json", 'r', encoding='utf-8') as file:
+        initial_prompt_json = json.load(file)
+        print(initial_prompt_json)
+    value = ""
+    for key in initial_prompt_json:
+        value = value + initial_prompt_json[key]
+
+    initial_prompt_data = value
+
+model = WhisperModel(MODEL_NAME, device=DEVICE, compute_type="float32", cpu_threads=8)
 
 print(f"using model: {MODEL_NAME} for {LANG}")
 
@@ -33,7 +46,7 @@ def sendToWhisper(audio_upload, results):
 
     results.append(result)
     print(f"task started for: {file_name}")
-    segments, info = model.transcribe(input_file=audio, beam_size=5, language=LANG, without_timestamps=False)
+    segments, _ = model.transcribe(input_file=audio, beam_size=6, language=LANG, without_timestamps=False, initial_prompt=initial_prompt_data)
 
     for segment in segments:
         print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
@@ -52,21 +65,18 @@ CSS = """
 
 with gr.Blocks(css=CSS) as demo:
 
-    gr.Markdown("### [Faster Whisper](https://openai.com/blog/whisper/)  Demo")
+    gr.Markdown("[Faster Whisper](https://github.com/guillaumekln/faster-whisper) Demo")
     gr.Markdown("A [Gradio](https://gradio.app) based Speech-to-Text (aka ASR) Demo of the [Open AI Whisper Model](https://github.com/openai/whisper)")
     
     results = gr.State([])
     with gr.Column():
 
-        gr.Markdown("### Upload audio")
-
         with gr.Row():
-            audio_upload = gr.Audio(source="upload", type="filepath", interactive=True, elem_id="audio_inputs")
+            audio_upload = gr.Audio(source="upload", type="filepath", interactive=True, elem_id="audio_inputs", label="Upload audio")
 
         with gr.Row():
             submit = gr.Button(value="Transcribe")
 
-        gr.Markdown("### Result")
         output = gr.Dataframe(headers=["Filename", "Transcription", "Time [s]"], label="Results", wrap=True)
 
     submit.click(fn=sendToWhisper, inputs=[audio_upload, results], outputs=output)
