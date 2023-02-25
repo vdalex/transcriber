@@ -5,8 +5,12 @@ from datetime import datetime
 from faster_whisper import WhisperModel
 import json
 
-#MODEL_NAME = "whisper-large-v2-ct2-int8/"
+# MODEL_NAME = "whisper-large-v2-ct2-int8/"
 MODEL_NAME = "whisper-large-v2-ct2-f16/"
+# MODEL_NAME = "whisper-large-v2-ru-f16/"
+# MODEL_NAME = "whisper-large-v2-ru-int8/"
+# MODEL_NAME = "whisper-small-ru-f16/"
+# MODEL_NAME = "whisper-small-ru-int8/"
 LANG = "ru"
 DEVICE = "cpu"
 
@@ -22,7 +26,8 @@ if os.path.isfile("initial_prompt.json"):
 
     initial_prompt_data = value
 
-model = WhisperModel(MODEL_NAME, device=DEVICE, compute_type="float32", cpu_threads=8)
+model = WhisperModel(MODEL_NAME, device=DEVICE, compute_type="float32", cpu_threads=4)
+# model = WhisperModel(MODEL_NAME, device=DEVICE, compute_type="int8", cpu_threads=4)
 
 print(f"using model: {MODEL_NAME} for {LANG}")
 
@@ -46,7 +51,7 @@ def sendToWhisper(audio_upload, results):
 
     results.append(result)
     print(f"task started for: {file_name}")
-    segments, _ = model.transcribe(input_file=audio, beam_size=6, language=LANG, without_timestamps=False, initial_prompt=initial_prompt_data)
+    segments, _ = model.transcribe(input_file=audio, beam_size=5, language=LANG, without_timestamps=False,  initial_prompt=initial_prompt_data, temperature=0.0)
 
     for segment in segments:
         print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))

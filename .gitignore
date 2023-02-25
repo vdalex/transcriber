@@ -2,3 +2,8 @@
 /whisper-large-v2-ct2-int8
 /initial_prompt.json
 /replacements.json
+/whisper-large-v2-ru-f16
+/whisper-large-v2-ru-int8
+/whisper-small-ru-f16
+/whisper-small-ru-int8
+/_initial_prompt.json
