@@ -7,8 +7,10 @@ import json
 
 # MODEL_NAME = "whisper-large-v2-ct2-int8/"
 MODEL_NAME = "whisper-large-v2-ct2-f16/"
+""" mitchelldehaven/whisper-large-v2-ru """
 # MODEL_NAME = "whisper-large-v2-ru-f16/"
 # MODEL_NAME = "whisper-large-v2-ru-int8/"
+""" VadymHromov/whisper-small-ru """
 # MODEL_NAME = "whisper-small-ru-f16/"
 # MODEL_NAME = "whisper-small-ru-int8/"
 LANG = "ru"
