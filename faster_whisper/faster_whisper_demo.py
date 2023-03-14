@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 import os
 import gradio as gr
-import whisper
 from datetime import datetime
+from faster_whisper import WhisperModel
 import json
 
-MODEL_NAME = "large-v2"
-#MODEL_NAME = "large-v1"
+""" openai/whisper-medium """
+MODEL_NAME = "models/whisper-large-v2-ct2-f16/"
+# MODEL_NAME = "models/whisper-medium-ct2-f16/"
+""" mitchelldehaven/whisper-large-v2-ru """
+# MODEL_NAME = "models/whisper-large-v2-ru-f16/"
+""" VadymHromov/whisper-small-ru """
+# MODEL_NAME = "models/whisper-small-ru-f16/"
 LANG = "ru"
 DEVICE = "cpu"
-TASK = "transcribe"
 
 initial_prompt_data = None
 
@@ -23,11 +27,13 @@ if os.path.isfile("initial_prompt.json"):
 
     initial_prompt_data = value
 
-model = whisper.load_model(name=MODEL_NAME, device=DEVICE, in_memory=False)
+model = WhisperModel(MODEL_NAME, device=DEVICE, compute_type="float32", cpu_threads=4)
+# model = WhisperModel(MODEL_NAME, device=DEVICE, compute_type="int8", cpu_threads=4)
 
 print(f"using model: {MODEL_NAME} for {LANG}")
 
 def sendToWhisper(audio_upload, results):
+    output_text = ""
     start, result = datetime.now(), [None, None, None]
 
     if audio_upload is None:
@@ -46,9 +52,13 @@ def sendToWhisper(audio_upload, results):
 
     results.append(result)
     print(f"task started for: {file_name}")
-    output = model.transcribe(audio, language=LANG, fp16=False, verbose=True, condition_on_previous_text=True, initial_prompt=initial_prompt_data)
+    segments, _ = model.transcribe(audio=audio, beam_size=5, language=LANG, without_timestamps=False,  initial_prompt=initial_prompt_data, temperature=0.0)
 
-    result[0], result[1], result[2] = file_name, output['text'], str((datetime.now() - start).total_seconds())
+    for segment in segments:
+        print("[%.2fs -> %.2fs] %s" % (segment.start, segment.end, segment.text))
+        output_text = output_text + segment.text
+
+    result[0], result[1], result[2] = file_name, output_text, str((datetime.now() - start).total_seconds())
     print(f"task completed for: {file_name}")
     return results
 
@@ -61,23 +71,20 @@ CSS = """
 
 with gr.Blocks(css=CSS) as demo:
 
-    gr.Markdown("### [OpenAI Whisper](https://openai.com/blog/whisper/)  Demo")
+    gr.Markdown("[Faster Whisper](https://github.com/guillaumekln/faster-whisper) Demo")
     gr.Markdown("A [Gradio](https://gradio.app) based Speech-to-Text (aka ASR) Demo of the [Open AI Whisper Model](https://github.com/openai/whisper)")
     
     results = gr.State([])
     with gr.Column():
 
-        gr.Markdown("### Upload audio")
-
         with gr.Row():
-            audio_upload = gr.Audio(source="upload", type="filepath", interactive=True, elem_id="audio_inputs")
+            audio_upload = gr.Audio(source="upload", type="filepath", interactive=True, elem_id="audio_inputs", label="Upload audio")
 
         with gr.Row():
             submit = gr.Button(value="Transcribe")
 
-        gr.Markdown("### Result")
         output = gr.Dataframe(headers=["Filename", "Transcription", "Time [s]"], label="Results", wrap=True)
 
     submit.click(fn=sendToWhisper, inputs=[audio_upload, results], outputs=output)
 
-demo.launch(share=True)
+demo.launch(share=False)

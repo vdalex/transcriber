@@ -1,9 +1,8 @@
-/whisper-large-v2-ct2-f16
-/whisper-large-v2-ct2-int8
-/initial_prompt.json
-/replacements.json
-/whisper-large-v2-ru-f16
-/whisper-large-v2-ru-int8
-/whisper-small-ru-f16
-/whisper-small-ru-int8
-/_initial_prompt.json
+/faster_whisper/initial_prompt.json
+/faster_whisper/replacements.json
+/whisper/initial_prompt.json
+/whisper/replacements.json
+/faster_whisper/models/whisper-large-v2-ct2-f16
+/faster_whisper/models/whisper-large-v2-ru-f16
+/faster_whisper/models/whisper-medium-ct2-f16
+/faster_whisper/models/whisper-small-ru-f16
