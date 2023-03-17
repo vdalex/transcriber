@@ -1,3 +1,7 @@
+```bash
+pip install "faster-whisper @ https://github.com/guillaumekln/faster-whisper/archive/refs/heads/master.tar.gz"
+```
+
 To convert hugging face models to ct2 format:
 
 ```bash
