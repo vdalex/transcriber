@@ -8,3 +8,4 @@ replacements.json
 /faster_whisper/models/whisper-large-v2-ru-f16
 /faster_whisper/models/whisper-medium-ct2-f16
 /faster_whisper/models/whisper-small-ru-f16
+/whisper_api/test.py

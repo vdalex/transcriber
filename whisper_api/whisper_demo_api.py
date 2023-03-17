@@ -4,12 +4,14 @@ import gradio as gr
 import openai
 from datetime import datetime
 import json
+import re
 
 MODEL_NAME = "whisper-1"
 LANG = "ru"
 # LANG = "uk"
 
 initial_prompt_data = None
+replacement_data = None
 
 if os.path.isfile("initial_prompt.json"):
     with open("initial_prompt.json", 'r', encoding='utf-8') as file:
@@ -20,6 +22,17 @@ if os.path.isfile("initial_prompt.json"):
         value = value + initial_prompt_json[key]
 
     initial_prompt_data = value
+
+if os.path.isfile("replacements.json"):
+    with open("replacements.json", 'r', encoding='utf-8') as file:
+        replacement_data = json.load(file)
+
+def replaceText(transcribtion_text):
+    for key in replacement_data.keys():
+        transcribtion_text = re.sub(r'(?i)'+key, replacement_data[key], transcribtion_text)
+    
+    return transcribtion_text
+
 
 def sendToWhisper(audio_upload, results):
     start, result = datetime.now(), [None, None, None]
@@ -41,8 +54,13 @@ def sendToWhisper(audio_upload, results):
     print(f"task started for: {file_name}")
     audio_data = open(audio, 'rb')
     transcription = openai.Audio.transcribe(MODEL_NAME, audio_data, language=LANG, prompt=initial_prompt_data)
+
+    if replacement_data:
+        text = replaceText(transcription["text"])
+    else:
+        text = transcription["text"]
     
-    result[0], result[1], result[2] = file_name, transcription["text"], str((datetime.now() - start).total_seconds())
+    result[0], result[1], result[2] = file_name, text, str((datetime.now() - start).total_seconds())
     print(f"task completed for: {file_name}")
     return results
 
