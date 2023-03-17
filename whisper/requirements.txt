@@ -1,0 +1,2 @@
+gradio==3.21.0
+openai_whisper==20230314
