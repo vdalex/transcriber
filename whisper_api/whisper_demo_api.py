@@ -92,4 +92,4 @@ with gr.Blocks(css=CSS) as demo:
 
     submit.click(fn=sendToWhisper, inputs=[audio_upload, results], outputs=output)
 
-demo.launch(share=False)
+demo.launch(server_name="0.0.0.0", server_port=7860, share=False)
