@@ -9,11 +9,30 @@ import json
 import re
 
 MODEL_NAME = "whisper-1"
-LANG = "ru"
-# LANG = "uk"
+# Language auto detection
+LANG = None
 
+config_data = None
 initial_prompt_data = None
 replacement_data = None
+
+model_name = MODEL_NAME
+language = LANG
+
+if os.path.isfile("config.json"):
+    with open("config.json", 'r', encoding='utf-8') as file:
+        config_data = json.load(file)
+
+    if "api_key" in config_data and config_data["api_key"] != "":
+        openai.api_key = config_data["api_key"]
+    else:
+        print("API key not found in config.json. Expect API key in environment variable OPENAI_API_KEY=<API-KEY>")
+
+    if "model_name" in config_data and config_data["model_name"] != "":
+        model_name = config_data["model_name"]
+
+    if "language" in config_data and config_data["language"] != "":
+        language = config_data["language"]
 
 if os.path.isfile("initial_prompt.json"):
     with open("initial_prompt.json", 'r', encoding='utf-8') as file:
@@ -80,7 +99,7 @@ def sendToWhisper(audio_upload, results):
     audio_data = io.BytesIO(convertAudio(audio))
     audio_data.name = "audio.mp3"
     transcription = openai.Audio.transcribe(
-        MODEL_NAME, audio_data, language=LANG, prompt=initial_prompt_data)
+        model_name, audio_data, language=language, prompt=initial_prompt_data)
 
     if replacement_data:
         text = replaceText(transcription["text"])
